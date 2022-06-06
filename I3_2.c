@@ -20,10 +20,7 @@ void data_throwing(struct timeval t0);
 int main(int argc, char** argv){
     int count_connect = 0;
     int max_accept = 10;
-    int s[max_accept];
-    for(int i=0 ; i<max_accept ; i++){
-        s[i] = -1;
-    }
+    int s = -1;
     int ss = -1;
     struct timeval t0;
     gettimeofday(&t0, NULL);
@@ -33,12 +30,12 @@ int main(int argc, char** argv){
         is_server = 1;
         int port = (int)atol(argv[1]);
         ss = make_socket_server(port, max_accept);
-        s[count_connect] = make_connect_server(ss);
+        s = make_connect_server(ss);
         count_connect++;
     }else if(argc==3){
         is_server = 0;
         int port = (int)atol(argv[2]);
-        s[count_connect] = make_socket(argv[1],port);
+        s = make_socket(argv[1],port);
         count_connect++;
     }else{
         die("argument");
@@ -62,9 +59,9 @@ int main(int argc, char** argv){
         if(n_send==0){
             break;
         }
-        send(s[0],data_send,n_send*sizeof(unsigned char),0);
+        send(s,data_send,n_send*sizeof(unsigned char),0);
         
-        n_recv = recv(s[0],data_recv,N,0);
+        n_recv = recv(s,data_recv,N,0);
         if(n_recv==-1){
             die("receive");
         }
@@ -73,10 +70,7 @@ int main(int argc, char** argv){
         }
         write(1,data_recv,n_recv*sizeof(unsigned char));
     }
-    
-    for(int i=0 ; i<count_connect ; i++){
-        close(s[i]);
-    }
+    close(s);
 }
 
 int make_socket_server(int port, int max_accept){
