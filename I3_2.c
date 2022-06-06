@@ -1,5 +1,3 @@
-//多者間通話を実装しようとして断念
-
 #include <netinet/in.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
