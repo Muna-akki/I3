@@ -118,24 +118,9 @@ void ifft(complex double * y,
   	fft_r(y, x, n, w);
 }
 
-void bandpass(complex double* y, complex double* x, long n, int slide){
-	double f0 = 44100;
-  	double T = n/f0;
-  	for(long i=0 ; i<n/2 ; i++){
-    	double f = i/T;
-    	if(abs(f)<fmin || fmax<abs(f)){
-      	y[i] = 0.0;
-    	}
-  	}
-  	for(long i=n/2 ; i<n ; i++){
-    	double f = (n-i)/T;
-    	if(abs(f)<fmin || fmax<abs(f)){
-    		y[i] = 0.0;
-    	}
-  	}
-}
 
-void change_frequency(complex double* y, complex double x, long n, int slide){
+
+void change_frequency(complex double* y, complex double* x, long n, int slide){
 	//slide分だけ周波数大きい方向へずらす
 	if(slide>0){
 		for(int i=n-1 ; i>=0 ; i--){
@@ -185,7 +170,7 @@ int main(int argc, char ** argv) {
     	fft(X, Y, n);
 		
 		//周波数変換
-    	chenge_frequency(Y,X,n,slide);
+    	change_frequency(Y,X,n,slide);
 
     	/* IFFT -> Z */
     	ifft(Y, X, n);

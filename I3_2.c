@@ -43,7 +43,9 @@ int main(int argc, char** argv){
     }else{
         die("argument");
     }
-    
+    if(is_server!=0 && is_server!=1){
+        die("server or client");
+    }
     int N = 1000;
     unsigned char data_recv[N];
     unsigned char data_send[N];
