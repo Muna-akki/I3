@@ -48,9 +48,11 @@ int main(int argc, char** argv){
     gettimeofday(&t1,NULL);
     double distance_time = ((double)t1.tv_sec*1000000+t1.tv_usec)-((double)t0.tv_sec*1000000+t0.tv_usec); //micro_second
     double throw_data = distance_time*44100*2/1000000; //44100 sampling/second * 52byte(16bit)/sampling
+    
     if(is_server!=0 && is_server!=1){
         die("server? or client?");
     }
+
     while(throw_data>0){
         n_send = read(0,data_send,N);
         if(n_send==-1){
