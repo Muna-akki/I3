@@ -1,0 +1,8 @@
+#!/bin/bash
+gcc -Wall I3_2.c -o I3_2
+gcc -Wall change_freq.c -o change_freq -lm
+if [ $#==4 ]; then
+    rec -t raw -b 16 -c 1 -e s -r 44100 - | ./change_freq 1024 $3 | ./I3_2 $1 $2 | play -t raw -b 16 -c 1 -e s -r 44100 -
+else
+    rec -t raw -b 16 -c 1 -e s -r 44100 - | ./change_freq 1024 $2 | ./I3_2 $1 | play -t raw -b 16 -e s -r 44100 -
+fi

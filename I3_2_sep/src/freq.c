@@ -1,17 +1,3 @@
-/* 
- * fft.c
- * 使い方
- *   ./fft n
- * 
- * 以下を繰り返す:
- *   標準入力から, 16 bit integerをn個読む
- *   FFTする
- *   逆FFTする
- *   標準出力へ出す
- *
- * したがって「ほぼ何もしない」フィルタになる
- * 
- */
 #include <assert.h>
 #include <complex.h>
 #include <math.h>
@@ -19,17 +5,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "freqlib.h"
+#include "phonelib.h"
 
-typedef short sample_t;
-
-void die(char * s) {
-	perror(s); 
-	exit(1);
-}
-
-/* fd から 必ず n バイト読み, bufへ書く.
-   n バイト未満でEOFに達したら, 残りは0で埋める.
-   fd から読み出されたバイト数を返す */
 ssize_t read_n(int fd, ssize_t n, void * buf) {
 	ssize_t re = 0;
   	while (re < n) {
@@ -42,7 +20,6 @@ ssize_t read_n(int fd, ssize_t n, void * buf) {
 	return re;
 }
 
-/* fdへ, bufからnバイト書く */
 ssize_t write_n(int fd, ssize_t n, void * buf) {
 	ssize_t wr = 0;
   	while (wr < n) {
@@ -53,7 +30,6 @@ ssize_t write_n(int fd, ssize_t n, void * buf) {
   	return wr;
 }
 
-/* 標本(整数)を複素数へ変換 */
 void sample_to_complex(sample_t * s, 
 		       complex double * X, 
 		       long n) {
@@ -61,7 +37,6 @@ void sample_to_complex(sample_t * s,
   	for (i = 0; i < n; i++) X[i] = s[i];
 }
 
-/* 複素数を標本(整数)へ変換. 虚数部分は無視 */
 void complex_to_sample(complex double * X, 
 		       sample_t * s, 
 		       long n) {
@@ -71,13 +46,6 @@ void complex_to_sample(complex double * X,
   	}
 }
 
-/* 高速(逆)フーリエ変換;
-   w は1のn乗根.
-   フーリエ変換の場合   偏角 -2 pi / n
-   逆フーリエ変換の場合 偏角  2 pi / n
-   xが入力でyが出力.
-   xも破壊される
- */
 void fft_r(complex double * x, 
 	   complex double * y, 
 	   long n, 
@@ -118,16 +86,39 @@ void ifft(complex double * y,
   	fft_r(y, x, n, w);
 }
 
+void bandpass(complex double* y, complex double* x, long n, long fmin, long fmax){
+  double f0 = 44100;
+  double T = n/f0;
+  for(long i=0 ; i<n/2 ; i++){
+    double f = i/T;
+    if(abs(f)<fmin || fmax<abs(f)){
+      y[i] = 0.0;
+    }
+  }
+  for(long i=n/2 ; i<n ; i++){
+    double f = (n-i)/T;
+    if(abs(f)<fmin || fmax<abs(f)){
+      y[i] = 0.0;
+    }
+  }
+}
 
 
 void change_frequency(complex double* y, complex double* x, long n, int slide){
 	//slide分だけ周波数大きい方向へずらす
+	//ここどうするかわからん
 	if(slide>0){
-		for(int i=n-1 ; i>=0 ; i--){
-			if(i+slide>=n){
+		for(int i=n/2 ; i>=0 ; i--){
+			if(i+slide>=n/2){
 				continue;
 			}
 			y[i+slide] = y[i];
+		}
+		for(int i=n/2 ; i<n ; i++){
+			if(i+slide>=n){
+				continue;
+			}
+			y[i] = y[i+slide];
 		}
 	}else{
 		slide *= -1;
@@ -140,6 +131,18 @@ void change_frequency(complex double* y, complex double* x, long n, int slide){
 	}
 }
 
+void print_complex(FILE * wp, 
+		   complex double * Y, long n) {
+  long i;
+  for (i = 0; i < n; i++) {
+    fprintf(wp, "%ld %f %f %f %f\n", 
+	    i, 
+	    creal(Y[i]), cimag(Y[i]),
+	    cabs(Y[i]), atan2(cimag(Y[i]), creal(Y[i])));
+  }
+}
+
+
 int pow2check(long N) {
   	long n = N;
   	while (n > 1) {
@@ -149,35 +152,26 @@ int pow2check(long N) {
   	return 1;
 }
 
-int main(int argc, char ** argv) {
-  	(void)argc;
-  	long n = atol(argv[1]);
-  	int slide = (int)atol(argv[2]);
-  	if (!pow2check(n)) {
-    	fprintf(stderr, "error : n (%ld) not a power of two\n", n);
-    	exit(1);
-  	}
-  	sample_t * buf = calloc(sizeof(sample_t), n);
-  	complex double * X = calloc(sizeof(complex double), n);
-  	complex double * Y = calloc(sizeof(complex double), n);
-  	while (1) {
-    	/* 標準入力からn個標本を読む */
-    	ssize_t m = read_n(0, n * sizeof(sample_t), buf);
-    	if (m == 0) break;
-    	/* 複素数の配列に変換 */
-    	sample_to_complex(buf, X, n);
-    	/* FFT -> Y */
-    	fft(X, Y, n);
-		
-		//周波数変換
-    	change_frequency(Y,X,n,slide);
-
-    	/* IFFT -> Z */
-    	ifft(Y, X, n);
-    	/* 標本の配列に変換 */
-    	complex_to_sample(X, buf, n);
-    	/* 標準出力へ出力 */
-    	write_n(1, m, buf);
-  	}
-  	return 0;
+int touch_sound(int s, int n0, sample_t* data, int slide){
+    long n = n0;
+    if(!pow2check(n)){
+        fprintf(stderr, "error : in (%ld) not a power of two\n", n);
+        exit(1);
+    }
+    if(n==0){
+        return 0;
+    }
+    sample_t * buf = calloc(sizeof(sample_t), n);
+    complex double* X = calloc(sizeof(complex double),n);
+    complex double* Y = calloc(sizeof(complex double),n);
+    buf = data;
+    sample_to_complex(buf, X,n);
+    fft(X,Y,n);
+    bandpass(Y,X,n, 20,20000);
+    change_frequency(Y,X,n,slide);
+    ifft(Y,X,n);
+    send(s, buf, n*sizeof(unsigned char), 0);
+    return n;
 }
+
+
