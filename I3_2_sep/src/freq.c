@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "freqlib.h"
-#include "phonelib.h"
+#include "./../include/phonelib.h"
+#include "./../include/freqlib.h"
 
 ssize_t read_n(int fd, ssize_t n, void * buf) {
 	ssize_t re = 0;

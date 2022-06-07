@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include "phonelib.h"
-
+#include "./../include/phonelib.h"
+#include "./../include/freqlib.h"
 
 
 int make_socket_server(int port, int max_accept){

@@ -9,7 +9,8 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/time.h>
-#include "phonelib.h"
+#include "./../include/phonelib.h"
+#include "./../include/freqlib.h"
 
 
 int main(int argc, char** argv){
@@ -38,7 +39,7 @@ int main(int argc, char** argv){
     if(is_server!=0 && is_server!=1){
         die("server or client");
     }
-    int N = 8192;
+    int N = 2;
     unsigned char data_recv[N];
     unsigned char data_send[N];
     int n_recv;
