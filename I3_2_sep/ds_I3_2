@@ -2,7 +2,7 @@
 make 
 
 if [ $#==3 ]; then
-    rec -t raw -b 16 -c 1 -e s -r 44100 - | .bin//I3_2 $1 $2 | play -t raw -b 16 -c 1 -e s -r 44100 -
+    rec -t raw -b 16 -c 1 -e s -r 44100 - | ./bin/I3_2 $1 $2 | play -t raw -b 16 -c 1 -e s -r 44100 -
 else
-    rec -t raw -b 16 -c 1 -e s -r 44100 - | .bin//I3_2 $1 | play -t raw -b 16 -e s -r 44100 -
+    rec -t raw -b 16 -c 1 -e s -r 44100 - | ./bin/I3_2 $1 | play -t raw -b 16 -e s -r 44100 -
 fi
