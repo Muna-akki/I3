@@ -168,9 +168,9 @@ int touch_sound(int s, int n0, sample_t* data, int slide){
     sample_to_complex(buf, X,n);
     fft(X,Y,n);
     bandpass(Y,X,n, 20,20000);
-    change_frequency(Y,X,n,slide);
+    //change_frequency(Y,X,n,slide);
     ifft(Y,X,n);
-    send(s, buf, n*sizeof(unsigned char), 0);
+    send(s, buf, n*sizeof(short), 0);
     return n;
 }
 
