@@ -70,7 +70,7 @@ void data_throwing(struct timeval t0){
     double distance_time = ((double)t1.tv_sec*1000000+t1.tv_usec)-((double)t0.tv_sec*1000000+t0.tv_usec); //micro_second
     double throw_data = distance_time*44100*2/1000000; //44100 sampling/second * 52byte(16bit)/sampling
     int N_ex = 1000;
-    unsigned char data_send_ex[N_ex];
+    short data_send_ex[N_ex*2];
     int n_send_ex;
     while(throw_data>0){
         n_send_ex = read(0,data_send_ex,N_ex);
