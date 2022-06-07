@@ -16,21 +16,27 @@
 int main(int argc, char** argv){
     struct timeval t0;
     gettimeofday(&t0, NULL);
+    long fmin = -1;
+    long fmax = -1;
     int slide = -1;
     int count_connect = 0;
     int max_accept = 10;
     int s = -1;
     int ss = -1;
     int is_server = -1;
-    if(argc==3){
-        slide = (int)atol(argv[2]);
+    if(argc==5){
+        fmin = atol(argv[2]);
+        fmax = atol(argv[3]);
+        slide = (int)atol(argv[4]);
         is_server = 1;
         int port = (int)atol(argv[1]);
         ss = make_socket_server(port, max_accept);
         s = make_connect_server(ss);
         count_connect++;
-    }else if(argc==4){
-        slide = (int)atol(argv[3]);
+    }else if(argc==6){
+        fmin = atol(argv[3]);
+        fmax = atol(argv[4]);
+        slide = (int)atol(argv[5]);
         is_server = 0;
         int port = (int)atol(argv[2]);
         s = make_socket(argv[1],port);
@@ -56,7 +62,7 @@ int main(int argc, char** argv){
         if(n_send==0){
             break;
         }
-        touch_sound(s,N,data_send,slide);
+        touch_sound(s,N,data_send,fmin,fmax,slide);
         //send(s,data_send,n_send,0);
 
         n_recv = recv(s,data_recv,N*2,0);

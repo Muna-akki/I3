@@ -19,6 +19,5 @@ void bandpass(complex double * y, complex double * x, long n, long fmin, long fm
 void change_frequency(complex double* y, complex double* x, long n, int slide);
 void print_complex(FILE* wp, complex double * Y, long n);
 int pow2check(long N);
-int touch_sound(int s, int n0, sample_t* data, int slide);
-
+int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide);
 

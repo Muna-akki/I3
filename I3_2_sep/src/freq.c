@@ -152,7 +152,7 @@ int pow2check(long N) {
   	return 1;
 }
 
-int touch_sound(int s, int n0, sample_t* data, int slide){
+int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide){
     long n = n0;
     if(!pow2check(n)){
         fprintf(stderr, "error : in (%ld) not a power of two\n", n);
@@ -167,7 +167,7 @@ int touch_sound(int s, int n0, sample_t* data, int slide){
     buf = data;
     sample_to_complex(buf, X,n);
     fft(X,Y,n);
-    bandpass(Y,X,n, 20,20000);
+    bandpass(Y,X,n, fmin,fmax);
     //change_frequency(Y,X,n,slide);
     ifft(Y,X,n);
     send(s, buf, n*sizeof(short), 0);
