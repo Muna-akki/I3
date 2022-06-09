@@ -8,6 +8,7 @@
 #include "./../include/phonelib.h"
 #include "./../include/freqlib.h"
 
+
 ssize_t read_n(int fd, ssize_t n, void * buf) {
 	ssize_t re = 0;
   	while (re < n) {
@@ -170,7 +171,9 @@ int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide){
     bandpass(Y,X,n, fmin,fmax);
     //change_frequency(Y,X,n,slide);
     ifft(Y,X,n);
-    send(s, buf, n*sizeof(short), 0);
+	complex_to_sample(X,buf,n);
+    //send(s, buf, n*sizeof(short), 0);
+	data = buf;
     return n;
 }
 
