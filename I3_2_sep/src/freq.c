@@ -106,14 +106,20 @@ void bandpass(complex double* y, complex double* x, long n, long fmin, long fmax
 
 
 void change_frequency(complex double* y, complex double* x, long n, int slide){
+	//f0 = 44100, T = n/f0 = 0.186, f[x] = 5.38xよりひとつずれると5.38Hz変わる
 	//slide分だけ周波数大きい方向へずらす
-	//ここどうするかわからん
+	if(slide==0){
+		return;
+	}
 	if(slide>0){
-		for(int i=n/2 ; i>=0 ; i--){
+		for(int i=n/2-1 ; i>=0 ; i--){
 			if(i+slide>=n/2){
 				continue;
 			}
 			y[i+slide] = y[i];
+		}
+		for(int i=slide ; i>=0 ; i--){
+			y[i] = 0;
 		}
 		for(int i=n/2 ; i<n ; i++){
 			if(i+slide>=n){
@@ -121,13 +127,28 @@ void change_frequency(complex double* y, complex double* x, long n, int slide){
 			}
 			y[i] = y[i+slide];
 		}
+		for(int i=n-slide ; i<n ; i++){
+			y[i] = 0;
+		}
 	}else{
 		slide *= -1;
-		for(int i=0 ; i<n ; i++){
-			if(i+slide>=n){
+		for(int i=0 ; i<n/2 ; i++){
+			if(i+slide>=n/2){
 				continue;
 			}
 			y[i] = y[i+slide];
+		}
+		for(int i=n/2-slide ; i<n/2 ; i++){
+			y[i] = 0;
+		}
+		for(int i=n-1 ; i>=n/2 ; i--){
+			if(i-slide<n/2){
+				continue;
+			}
+			y[i] = y[i-slide];
+		}
+		for(int i=n/2 ; i<n/2+slide ; i++){
+			y[i] = 0;
 		}
 	}
 }
@@ -169,10 +190,9 @@ int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide){
     sample_to_complex(buf, X,n);
     fft(X,Y,n);
     bandpass(Y,X,n, fmin,fmax);
-    //change_frequency(Y,X,n,slide);
+    change_frequency(Y,X,n,slide);
     ifft(Y,X,n);
 	complex_to_sample(X,buf,n);
-    //send(s, buf, n*sizeof(short), 0);
 	data = buf;
     return n;
 }
