@@ -183,7 +183,7 @@ int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide){
     if(n==0){
         return 0;
     }
-    sample_t * buf = calloc(sizeof(sample_t), n);
+    sample_t * buf;
     complex double* X = calloc(sizeof(complex double),n);
     complex double* Y = calloc(sizeof(complex double),n);
     buf = data;
@@ -194,6 +194,8 @@ int touch_sound(int s, int n0, sample_t* data, long fmin, long fmax, int slide){
     ifft(Y,X,n);
 	complex_to_sample(X,buf,n);
 	data = buf;
+	free(X);
+	free(Y);
     return n;
 }
 
